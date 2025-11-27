@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字转语音播放器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>文字转语音播放器</h1>
+        <p class="subtitle">输入文字，选择声音，生成并播放语音</p>
+        
+        <div class="input-group">
+            <label for="text-input">输入要转换的文字：</label>
+            <textarea id="text-input" placeholder="请输入要转换为语音的文字...">欢迎使用文字转语音播放器，这是一个基于OpenAI TTS技术的语音生成工具。</textarea>
+        </div>
+        
+        <div class="settings-group">
+            <div class="setting">
+                <label for="voice-select">选择音色：</label>
+                <select id="voice-select">
+                    <optgroup label="女声">
+                        <option value="zh-CN-XiaoxiaoNeural">晓晓 (年轻女声，通用)</option>
+                        <option value="zh-CN-XiaoyiNeural">小艺 (年轻女声，活泼)</option>
+                        <option value="zh-HK-HiuGaaiNeural">晓佳 (香港粤语，清晰)</option>
+                        <option value="zh-HK-HiuMaanNeural">晓雯 (香港粤语，温柔)</option>
+                        <option value="zh-TW-HsiaoChenNeural">晓珍 (台湾国语，温柔)</option>
+                        <option value="zh-TW-HsiaoYuNeural">晓玉 (台湾国语，甜美)</option>
+                    </optgroup>
+                    <optgroup label="男声">
+                        <option value="zh-CN-YunfengNeural">云风 (年轻男声，阳光)</option>
+                        <option value="zh-CN-YunhaoNeural">云浩 (成熟男声，稳重)</option>
+                        <option value="zh-CN-YunjianNeural">云剑 (成熟男声，权威)</option>
+                        <option value="zh-CN-YunxiNeural">云希 (年轻男声，温柔)</option>
+                        <option value="zh-CN-YunxiaNeural">云夏 (成熟男声，知性)</option>
+                        <option value="zh-CN-YunyangNeural">云扬 (成熟男声，专业)</option>
+                        <option value="zh-CN-YanNeural">言 (男声，新闻播报)</option>
+                        <option value="zh-HK-WanLungNeural">云龙 (香港粤语，稳重)</option>
+                        <option value="zh-TW-YunJheNeural">云哲 (台湾国语，沉稳)</option>
+                    </optgroup>
+                    <optgroup label="方言/特色">
+                        <option value="zh-CN-liaoning-XiaobeiNeural">小北 (东北口音，活泼)</option>
+                        <option value="zh-CN-shaanxi-XiaoniNeural">小妮 (陕西口音，亲切)</option>
+                    </optgroup>
+                </select>
+                <div class="voice-info">不同音色适合不同场景，请根据需求选择</div>
+            </div>
+            
+            <div class="setting">
+                <label for="model-select">选择模型：</label>
+                <select id="model-select">
+                    <option value="tts-1">TTS-1 (标准质量，响应快)</option>
+                    <option value="tts-1-hd">TTS-1-HD (高质量，细节丰富)</option>
+                </select>
+                <div class="voice-info">高质量模型生成时间稍长，但音质更好</div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="api-key">API密钥：</label>
+            <input type="password" id="api-key" placeholder="请输入API密钥" class="api-key-input">
+        </div>
+        
+        <div class="button-group">
+            <button class="generate-btn" id="generate-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                生成语音
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在生成语音，请稍候...</p>
+        </div>
+        
+        <div class="message error" id="error-message"></div>
+        <div class="message success" id="success-message"></div>
+        
+        <div class="player" id="player">
+            <div class="player-title">语音播放器</div>
+            <div class="audio-controls">
+                <button class="play-btn" id="play-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+                    </svg>
+                    播放
+                </button>
+                <button class="pause-btn" id="pause-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
+                        <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
+                    </svg>
+                    暂停
+                </button>
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div class="time" id="time">00:00 / 00:00</div>
+            </div>
+            <div class="volume-control">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9V15H7L12 20V4L7 9H3Z" fill="currentColor"/>
+                </svg>
+                <input type="range" min="0" max="100" value="80" class="volume-slider" id="volume-slider">
+            </div>
+            <div class="button-group">
+                <button class="download-btn" id="download-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 16L12 4M12 16L8 12M12 16L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    下载语音
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
